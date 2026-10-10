@@ -110,19 +110,33 @@ public class TodoController {
     }
     //UPDATE(U)
     @GetMapping("/edit/{id}")
-    public String editForm(@PathVariable Long id,Model model){
+    public String editForm(@PathVariable Long id,
+                           @RequestParam String keyword,
+                           @RequestParam(defaultValue = "dueDateAsc")
+                                   //defaultvalue 적용 이유
+                                   // 검색 정렬 화면이 아닌곳에서
+                                   //수정 호ㅏ면에 접근해도
+                               //400 오류 발생하지 않기 위해서
+                               String sortType,
+                           Model model){
         //localhost:8080/edit/1
         Todo todo=todoService.findById(id);
         model.addAttribute("todo",todo);
+        model.addAttribute("keyword",keyword);
+        model.addAttribute("sortType",sortType);
         return "edit";
     }
     @PostMapping("/edit/{id}")
     public String edit(@PathVariable Long id,
+                       @RequestParam String keyword,
+                       @RequestParam(defaultValue = "dueDateAsc")
+                       String sortType,
                        @RequestParam String text,
                        @RequestParam String priority,
+                       RedirectAttributes redirectAttributes,
                        @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE)LocalDate dueDate) {
         todoService.updateTodo(id,text,priority,dueDate);
-        return "redirect:/";
+        return redirectToList(keyword,sortType,redirectAttributes);
     }
 
     @GetMapping("/search")
